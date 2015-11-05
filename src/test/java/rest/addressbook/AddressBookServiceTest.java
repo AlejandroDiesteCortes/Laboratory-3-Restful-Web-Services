@@ -124,7 +124,8 @@ public class AddressBookServiceTest {
 				.get();
 		List<Person> list3 = response.readEntity(AddressBook.class)
 				.getPersonList();
-		// compare the list before the las POST and the list after the last POST
+		// compare the list before the last POST and the list after the last
+		// POST
 		assertNotEquals(list2, list3);
 	}
 
@@ -221,7 +222,30 @@ public class AddressBookServiceTest {
 		// Verify that POST is well implemented by the service, i.e
 		// test that it is not safe and not idempotent
 		// ////////////////////////////////////////////////////////////////////
-
+		Person alex=new Person();
+		alex.setName("alex");
+		List<Person>list1=addressBookRetrieved.getPersonList();
+		response = client.target("http://localhost:8282/contacts")
+				.request(MediaType.APPLICATION_JSON)
+				.post(Entity.entity(alex, MediaType.APPLICATION_JSON));
+		response = client.target("http://localhost:8282/contacts").request()
+				.get();
+		List<Person> list2 = response.readEntity(AddressBook.class)
+				.getPersonList();
+		// compare the list before the first POST and the list after the first
+		// POST to check that POST is not safe
+		assertNotEquals(list1, list2);
+		
+		response = client.target("http://localhost:8282/contacts")
+				.request(MediaType.APPLICATION_JSON)
+				.post(Entity.entity(alex, MediaType.APPLICATION_JSON));
+		response = client.target("http://localhost:8282/contacts").request()
+				.get();
+		List<Person> list3 = response.readEntity(AddressBook.class)
+				.getPersonList();
+		// compare the list before the last POST and the list after the last
+		// POST to check that POST is not idempotent
+		assertNotEquals(list2, list3);
 	}
 
 	@Test
@@ -318,7 +342,7 @@ public class AddressBookServiceTest {
 		response = client.target("http://localhost:8282/contacts/person/2")
 				.request().delete();
 		assertEquals(204, response.getStatus());
-		
+
 		// state after the first delete and before the second delete
 		response = client.target("http://localhost:8282/contacts").request()
 				.get();
@@ -340,9 +364,10 @@ public class AddressBookServiceTest {
 		// test that it is idempotent
 		// ////////////////////////////////////////////////////////////////////
 
-		//to verify that delete is idempotent we check that the state 
-		//changes after the first delete but doesnt change after the second delete
-		assertNotEquals(list1,list2);
+		// to verify that delete is idempotent we check that the state
+		// changes after the first delete but doesnt change after the second
+		// delete
+		assertNotEquals(list1, list2);
 		assertEquals(list2, list3);
 	}
 
